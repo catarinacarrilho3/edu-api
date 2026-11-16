@@ -99,6 +99,13 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message });
 });
 
+app.get('/calc', (req, res) => {
+  const expr = req.query.expr || '2+2';
+  // Insecure eval
+  const result = eval(expr);
+  res.json({ result });
+});
+
 app.listen(3000, () => {
   console.log('API rodando em http://localhost:3000');
 });
