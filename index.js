@@ -60,26 +60,9 @@ app.use(
 );
 
 const users = [
-  {
-    id: 1,
-    name: 'Alice Silva',
-    role: 'professora',
-    email: 'alice.silva@edulearn.com',
-    dateOfBirth: '12/04/1998',
-    cpf: '12345678901',
-    department: 'Ciência da Computação',
-    salary: 'R$ 4.500,00'
-  },
-  {
-    id: 2,
-    name: 'Bruno Costa',
-    role: 'aluno',
-    email: 'bruno.costa@edulearn.com',
-    dateOfBirth: '03/09/2001',
-    cpf: '98765432100',
-    department: 'Engenharia',
-    salary: 'R$ 0,00'
-  }
+  { id: 1, name: 'Alice Silva', role: 'professora', email: 'alice.silva@edulearn.com', dateOfBirth: '12/04/1998', cpf: '12345678901', department: 'Ciência da Computação', salary: 'R$ 4.500,00' },
+  { id: 2, name: 'Lucas Reinaldo', role: 'professor', email: 'lucas.reinaldo@edulearn.com', dateOfBirth: '23/11/1985', cpf: '98765432100', department: 'Matemática', salary: 'R$ 6.200,00' },
+  { id: 3, name: 'Carla Oliveira', role: 'professora', email: 'carla.oliveira@edulearn.com', dateOfBirth: '30/07/2000', cpf: '13579246800', department: 'Química', salary: 'R$ 5.000,00' }
 ];
 
 app.get('/users', (req, res) => {
@@ -91,6 +74,19 @@ app.get('/users', (req, res) => {
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', client.register.contentType);
   res.end(await client.register.metrics());
+});
+
+// Calculadora segura (sem eval e sem Function)
+app.get('/calc', (req, res) => {
+  const expr = String(req.query.expr || '2+2');
+  const m = expr.match(/^\s*(-?\d+(?:\.\d+)?)\s*([+\-*/])\s*(-?\d+(?:\.\d+)?)\s*$/);
+  if (!m) {
+    return res.status(400).json({ error: 'Use o formato: numero operador numero' });
+  }
+  const a = parseFloat(m[1]);
+  const b = parseFloat(m[3]);
+  const ops = { '+': a + b, '-': a - b, '*': a * b, '/': b === 0 ? null : a / b };
+  res.json({ result: ops[m[2]] });
 });
 
 // Tratamento de erros de autenticação
