@@ -93,16 +93,23 @@ app.get('/metrics', async (req, res) => {
   res.end(await client.register.metrics());
 });
 
+// Calculadora segura (sem eval e sem Function)
+app.get('/calc', (req, res) => {
+  const expr = String(req.query.expr || '2+2');
+  const m = expr.match(/^\s*(-?\d+(?:\.\d+)?)\s*([+\-*/])\s*(-?\d+(?:\.\d+)?)\s*$/);
+  if (!m) {
+    return res.status(400).json({ error: 'Use o formato: numero operador numero' });
+  }
+  const a = parseFloat(m[1]);
+  const b = parseFloat(m[3]);
+  const ops = { '+': a + b, '-': a - b, '*': a * b, '/': b === 0 ? null : a / b };
+  res.json({ result: ops[m[2]] });
+});
+
 // Tratamento de erros de autenticação
 app.use((err, req, res, next) => {
   logger.error('Erro de autenticação', { message: err.message, path: req.path });
   res.status(err.status || 500).json({ error: err.message });
-});
-
-app.get('/calc', (req, res) => {
-  const expr = req.query.expr || '2+2';
-  const safe = expr.match(/^[0-9+\-*/ ().]+$/) ? Function(`return ${expr}`)() : null;
-  res.json({ result: safe });
 });
 
 app.listen(3000, () => {
