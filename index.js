@@ -101,9 +101,8 @@ app.use((err, req, res, next) => {
 
 app.get('/calc', (req, res) => {
   const expr = req.query.expr || '2+2';
-  // Insecure eval
-  const result = eval(expr);
-  res.json({ result });
+  const safe = expr.match(/^[0-9+\-*/ ().]+$/) ? Function(`return ${expr}`)() : null;
+  res.json({ result: safe });
 });
 
 app.listen(3000, () => {
